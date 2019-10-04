@@ -5,8 +5,7 @@ import numpy as np
 import time
 
 
-
-def main(bib_path="./bib", rpt_path="./", rpt_name="RefClean_Report.txt"):
+def main(bib_path="./bib", rpt_path="./", rpt_name="RefClean_Report.txt", mode=0):
     # bib_path = "./bib"
     # rpt_path = "./"
     # rpt_name = "RefClean_Report.txt"
