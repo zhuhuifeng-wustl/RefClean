@@ -12,7 +12,7 @@ def main(bib_path="./bib", rpt_path="./", rpt_name="RefClean_Report.txt"):
     # rpt_name = "RefClean_Report.txt"
 
     print_line()
-    print("RefClean: An Automatically tool for duplicated references checking.")
+    print("RefClean: An automatic tool for duplicated references checking.")
     time_stamp = time.strftime('%m/%d/%Y-%H:%M:%S', time.localtime(time.time()))
     print(time_stamp)
 
