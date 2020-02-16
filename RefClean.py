@@ -12,6 +12,7 @@ def main(bib_path="./bib", rpt_path="./", rpt_name="RefClean_Report.txt", mode=0
 
     print_line()
     print("RefClean: An automatic tool for duplicated references checking.")
+    print("Washington University in St.Louis - Huifeng Zhu (zhuhuifeng@wustl.edu)\n")
     time_stamp = time.strftime('%m/%d/%Y-%H:%M:%S', time.localtime(time.time()))
     print(time_stamp)
 
@@ -97,7 +98,6 @@ def main(bib_path="./bib", rpt_path="./", rpt_name="RefClean_Report.txt", mode=0
                     right_brace_num = 0
     print("Imported %d bib references." % (len(reference) - 1))
     print_line()
-
     # process the reference library
     print("Start extracting the information from bib library...")
     print("Checking the duplicated items...")
@@ -114,16 +114,37 @@ def main(bib_path="./bib", rpt_path="./", rpt_name="RefClean_Report.txt", mode=0
         else:
             reference_none_num = reference_none_num + len(dup[-1])
     print("Detected %d duplicated references (includes %d items)." % (
-        len(reference_duplicated) - 1, reference_duplicated_num))
-    print_line()
-
-    # print_list_2d(reference_duplicated)
+        len(reference_duplicated), reference_duplicated_num))
+    # check the entries of duplicated references
+    reference_duplicated_diff_cites = []
+    reference_duplicated_diff_cites_num = 0
+    print("Checking the entries of the duplicated items...")
+    for dup in reference_duplicated:
+        if dup[0] != "none":
+            cites = []
+            for ind in dup[-1]:
+                cites.append(reference_cites[ind])
+            if_cites_same = 1
+            for i in range(len(cites)):
+                for j_cite in cites[i + 1:]:
+                    if cites[i] != j_cite:
+                        if_cites_same = 0
+                        break
+                if if_cites_same == 0:
+                    break
+            if if_cites_same is 0:
+                reference_duplicated_diff_cites.append(dup)
+                reference_duplicated_diff_cites_num = reference_duplicated_diff_cites_num + len(dup[-1])
+    print("Detected %d of all duplicated references have different entries (includes %d items)." % (
+        len(reference_duplicated_diff_cites), reference_duplicated_diff_cites_num))
 
     # write report
+    print_line()
     print("Generating report...")
     rpt = open(rpt_path + '/' + rpt_name, "w")
     rpt.write("-------------------------------------\n")
     rpt.write("RefClean: An Automatically tool for duplicated references checking.\n")
+    rpt.write("Washington University in St.Louis - Huifeng Zhu (zhuhuifeng@wustl.edu)\n")
     rpt.write(time_stamp + "\n")
     rpt.write("-------------------------------------\n")
     rpt.write("Scanning for the bib files in %s.\n" % bib_path)
@@ -134,28 +155,20 @@ def main(bib_path="./bib", rpt_path="./", rpt_name="RefClean_Report.txt", mode=0
     rpt.write("Imported %d bib references.\n" % (len(reference) - 1))
     rpt.write("Detected %d duplicated references (includes %d items).\n" % (
         len(reference_duplicated) - 1, reference_duplicated_num))
+    rpt.write("Detected %d of all duplicated references have different entries (includes %d items).\n" % (
+        len(reference_duplicated_diff_cites), reference_duplicated_diff_cites_num))
     rpt.write("\n")
     rpt.write("\n")
     rpt.write("======================== Report ========================\n")
-    dup_num = 0
-    for dup in reference_duplicated:
-        if dup[0] != "none":
-            dup_num += 1
-            rpt.write("-------------------------------------\n")
-            rpt.write("Dup Number: %d\n" % dup_num)
-            rpt.write("\n")
-            for ind in dup[-1]:
-                ref = reference[ind + 1]
-                rpt.write("In %s : %d-%d :\n" % (ref[0], int(ref[1]), int(ref[2])))
-                with open(ref[0], 'r') as x:
-                    line = x.readlines()
-                    for i in range(int(ref[1]) - 1, int(ref[2])):
-                        rpt.write('\t' + line[i])
-                    # rpt.writelines(line[ref[1]-1:ref[2]])
-                    rpt.write("\n")
-                # print(reference[ind+1])
+    rpt.write("\n")
+    rpt.write("================================================\n")
+    rpt.write("The duplicated items with different entries:\n")
+    print_dup(reference_duplicated_diff_cites, reference, rpt)
+    rpt.write("================================================\n")
+    rpt.write("All duplicated items:\n")
+    print_dup(reference_duplicated, reference, rpt)
 
-    rpt.write("-------------------------------------\n")
+    rpt.write("================================================\n")
     rpt.write("The items that need further check:\n")
     for i in range(len(reference_titles)):
         # print(i)
@@ -199,6 +212,26 @@ def list_duplicates(seq):
 
 def print_list_2d(list_2d):
     print(np.reshape(list_2d, (-1, len(list_2d[0]))))
+
+
+def print_dup(dup_list, all_reference_list, rpt):
+    dup_num = 0
+    for dup in dup_list:
+        if dup[0] != "none":
+            dup_num += 1
+            rpt.write("-------------------------------------\n")
+            rpt.write("Dup Number: %d\n" % dup_num)
+            rpt.write("\n")
+            for ind in dup[-1]:
+                ref = all_reference_list[ind + 1]
+                rpt.write("In %s : %d-%d :\n" % (ref[0], int(ref[1]), int(ref[2])))
+                with open(ref[0], 'r') as x:
+                    line = x.readlines()
+                    for i in range(int(ref[1]) - 1, int(ref[2])):
+                        rpt.write('\t' + line[i])
+                    # rpt.writelines(line[ref[1]-1:ref[2]])
+                    rpt.write("\n")
+                # print(reference[ind+1])
 
 
 main()
